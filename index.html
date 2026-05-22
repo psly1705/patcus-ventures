@@ -1156,9 +1156,9 @@ function loadAdminList(type) {
 }
 
 // ─── Logout ──────────────────────────────────────────────────────
-async function doLogout() {
-  await fetch('/logout');
-  window.location.href = '/';
+function doLogout() {
+  // Navigate directly — Flask clears the session and redirects to login
+  window.location.href = '/logout';
 }
 
 // ─── PWA ─────────────────────────────────────────────────────────

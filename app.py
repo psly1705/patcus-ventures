@@ -3,7 +3,7 @@ PATCUS VENTURES - PWA Server
 Block Factory Management System
 """
 
-from flask import Flask, render_template, request, jsonify, session, send_from_directory
+from flask import Flask, render_template, request, jsonify, session, send_from_directory, redirect
 import json
 import os
 from datetime import datetime
@@ -113,7 +113,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
-    return jsonify({'success': True})
+    return redirect('/')
 
 # ── Get all data ───────────────────────────────────────────────────────────
 @app.route('/api/get_data')
