@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a1f16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PATCUS">
+<link rel="manifest" href="/manifest.json">
+<title>PATCUS VENTURES</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green-900: #0a1f16;
+  --green-800: #0f2b22;
+  --green-700: #1a3d2e;
+  --green-600: #1e4a38;
+  --green-500: #2a6048;
+  --gold: #f9b81b;
+  --gold-dim: rgba(249,184,27,0.15);
+  --white: #ffffff;
+  --off-white: #f4f7f4;
+  --gray-50: #f8faf8;
+  --gray-100: #eef2ee;
+  --gray-300: #c8d4c8;
+  --gray-400: #9aaa9a;
+  --gray-600: #607060;
+  --red: #c44536;
+  --red-dim: rgba(196,69,54,0.1);
+  --blue: #1565c0;
+  --blue-dim: rgba(21,101,192,0.1);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.15);
+  --header-h: 64px;
+  --userbar-h: 46px;
+  --tabbar-h: 56px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--off-white);
+  color: var(--green-900);
+  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  min-height: 100vh;
+}
+
+/* ─── HEADER ─────────────────────────────────────────── */
+.header {
+  background: linear-gradient(135deg, var(--green-900) 0%, var(--green-700) 100%);
+  height: var(--header-h);
+  padding: 0 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 200;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+}
+
+.header-brand {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.header-icon {
+  width: 38px; height: 38px;
+  background: var(--gold);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 2px 10px rgba(249,184,27,0.4);
+  flex-shrink: 0;
+}
+
+.header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+}
+
+.header-sub {
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.3px;
+}
+
+/* ─── USER BAR ────────────────────────────────────────── */
+.user-bar {
+  background: var(--green-800);
+  height: var(--userbar-h);
+  padding: 0 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(249,184,27,0.1);
+  position: sticky; top: var(--header-h); z-index: 199;
+}
+
+.user-pill {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.8rem; color: rgba(255,255,255,0.75);
+}
+
+.user-avatar {
+  width: 28px; height: 28px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(249,184,27,0.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+
+.role-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.role-badge.system_admin { background: rgba(249,184,27,0.2); color: var(--gold); }
+.role-badge.manager      { background: rgba(30,74,56,0.8); color: #7de0a8; border: 1px solid rgba(125,224,168,0.3); }
+.role-badge.sales        { background: rgba(21,101,192,0.2); color: #82b4f5; }
+
+.logout-btn {
+  background: rgba(196,69,54,0.15);
+  border: 1px solid rgba(196,69,54,0.3);
+  color: #ff8070;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.2s;
+}
+.logout-btn:hover { background: rgba(196,69,54,0.25); }
+
+/* ─── TAB BAR ─────────────────────────────────────────── */
+.tab-bar {
+  background: white;
+  border-bottom: 1px solid var(--gray-100);
+  display: flex;
+  position: sticky;
+  top: calc(var(--header-h) + var(--userbar-h));
+  z-index: 198;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex: 1; min-width: 68px;
+  height: var(--tabbar-h);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px;
+  background: white; border: none; cursor: pointer;
+  color: var(--gray-400);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.3px; white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.tab-icon { font-size: 18px; line-height: 1; }
+
+.tab.active {
+  color: var(--green-800);
+  border-bottom-color: var(--gold);
+}
+
+/* ─── PAGE CONTENT ────────────────────────────────────── */
+.page { display: none; padding: 16px; animation: fadeUp 0.25s ease both; }
+.page.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── CARD ────────────────────────────────────────────── */
+.card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--off-white);
+}
+
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--green-800);
+  display: flex; align-items: center; gap: 8px;
+}
+
+.card-title-icon {
+  width: 30px; height: 30px;
+  background: var(--gold-dim);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+
+/* ─── FORM ────────────────────────────────────────────── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-full  { grid-column: 1 / -1; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.field label {
+  font-size: 0.72rem; font-weight: 600;
+  color: var(--gray-600); letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.field input,
+.field select,
+.field textarea {
+  padding: 11px 14px;
+  border: 1.5px solid var(--gray-100);
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem; color: var(--green-900);
+  background: var(--gray-50);
+  transition: border-color 0.2s, background 0.2s;
+  -webkit-appearance: none;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--gold);
+  background: white;
+}
+
+.field select { cursor: pointer; }
+
+.hint {
+  font-size: 0.72rem; color: var(--gray-400);
+  background: var(--gray-50);
+  padding: 8px 12px; border-radius: 8px;
+  border: 1px dashed var(--gray-300);
+  margin-top: 4px;
+}
+
+/* ─── BUTTONS ─────────────────────────────────────────── */
+.btn {
+  padding: 13px 20px;
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem; font-weight: 700;
+  cursor: pointer; border: none;
+  transition: transform 0.15s, opacity 0.2s;
+  width: 100%; margin-top: 6px;
+}
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.6; pointer-events: none; }
+
+.btn-primary {
+  background: var(--green-800); color: white;
+  box-shadow: 0 4px 14px rgba(15,43,34,0.25);
+}
+
+.btn-danger {
+  background: var(--red); color: white;
+  padding: 6px 12px; width: auto; font-size: 0.75rem;
+  border-radius: 8px; margin-top: 0;
+}
+
+.btn-gold {
+  background: var(--gold); color: var(--green-900);
+  box-shadow: 0 4px 14px rgba(249,184,27,0.3);
+}
+
+/* ─── STATS GRID ──────────────────────────────────────── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-bottom: 14px;
+}
+
+.stat-card {
+  border-radius: var(--radius-md);
+  padding: 14px 12px; text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card.green  { background: var(--green-800); }
+.stat-card.red    { background: var(--red); }
+.stat-card.blue   { background: var(--blue); }
+
+.stat-label {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.6px;
+  text-transform: uppercase; color: rgba(255,255,255,0.55);
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--gold);
+}
+
+.stat-card.red   .stat-value,
+.stat-card.blue  .stat-value { color: white; }
+
+/* ─── INVENTORY ───────────────────────────────────────── */
+.inv-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.inv-item {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  transition: border-color 0.2s;
+}
+
+.inv-item.low { border-color: rgba(196,69,54,0.3); background: rgba(196,69,54,0.04); }
+.inv-item.ok  { border-color: rgba(30,74,56,0.2); }
+
+.inv-type {
+  font-size: 0.72rem; font-weight: 700;
+  color: var(--gray-600); text-transform: uppercase;
+  letter-spacing: 0.4px; margin-bottom: 10px;
+}
+
+.inv-remaining {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem; font-weight: 900; line-height: 1;
+  margin-bottom: 2px;
+}
+
+.inv-item.ok   .inv-remaining { color: var(--green-800); }
+.inv-item.low  .inv-remaining { color: var(--red); }
+
+.inv-remaining-label {
+  font-size: 0.65rem; color: var(--gray-400);
+  margin-bottom: 10px;
+}
+
+.inv-row {
+  display: flex; justify-content: space-between;
+  font-size: 0.72rem; color: var(--gray-600);
+}
+
+/* ─── HISTORY TABLE ───────────────────────────────────── */
+.history-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
+
+.history-table {
+  width: 100%; border-collapse: collapse; font-size: 0.78rem; min-width: 360px;
+}
+
+.history-table th {
+  background: var(--green-800); color: rgba(255,255,255,0.8);
+  padding: 10px 12px; font-weight: 600; font-size: 0.68rem;
+  letter-spacing: 0.4px; text-transform: uppercase; text-align: left;
+  white-space: nowrap;
+}
+.history-table th:first-child { border-radius: 10px 0 0 0; }
+.history-table th:last-child  { border-radius: 0 10px 0 0; }
+
+.history-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--gray-100);
+  color: var(--green-900);
+  vertical-align: middle;
+}
+
+.history-table tr:last-child td { border-bottom: none; }
+.history-table tr:hover td { background: var(--gray-50); }
+
+.badge {
+  display: inline-block; padding: 2px 8px;
+  border-radius: 20px; font-size: 0.68rem; font-weight: 600;
+}
+.badge-green { background: rgba(30,74,56,0.1); color: var(--green-700); }
+.badge-gold  { background: rgba(249,184,27,0.15); color: #a07808; }
+.badge-red   { background: rgba(196,69,54,0.1); color: var(--red); }
+.badge-blue  { background: rgba(21,101,192,0.1); color: #1565c0; }
+
+/* ─── EMPTY STATE ─────────────────────────────────────── */
+.empty-state {
+  text-align: center; padding: 40px 20px;
+  color: var(--gray-400);
+}
+.empty-state .empty-icon { font-size: 40px; margin-bottom: 10px; }
+.empty-state p { font-size: 0.85rem; }
+
+/* ─── TOAST ───────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom));
+  left: 50%; transform: translateX(-50%);
+  padding: 12px 22px;
+  border-radius: 30px;
+  font-size: 0.85rem; font-weight: 500;
+  z-index: 999; display: none; white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+  animation: toastIn 0.3s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.toast.success { background: var(--green-800); color: var(--gold); }
+.toast.error   { background: var(--red); color: white; }
+
+/* ─── SECTION LABEL ───────────────────────────────────── */
+.section-label {
+  font-size: 0.68rem; font-weight: 700; color: var(--gray-400);
+  letter-spacing: 1px; text-transform: uppercase;
+  margin: 4px 4px 10px;
+}
+
+/* ─── INSTALL BANNER ──────────────────────────────────── */
+.install-banner {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--gold); color: var(--green-900);
+  padding: 12px 16px;
+  text-align: center; font-weight: 700; font-size: 0.82rem;
+  cursor: pointer; z-index: 500;
+  transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.install-banner.show { transform: translateY(0); }
+
+/* ─── MOBILE ──────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-full { grid-column: auto; }
+  .stats-row { gap: 7px; }
+  .stat-value { font-size: 0.95rem; }
+  .inv-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-brand">
+    <div class="header-icon">🏭</div>
+    <div>
+      <div class="header-title">PATCUS VENTURES</div>
+      <div class="header-sub">BLOCK FACTORY MANAGEMENT</div>
+    </div>
+  </div>
+</div>
+
+<!-- User bar -->
+<div class="user-bar">
+  <div class="user-pill">
+    <div class="user-avatar">👤</div>
+    <span id="userName">Loading…</span>
+    <span class="role-badge" id="roleBadge"></span>
+  </div>
+  <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+</div>
+
+<!-- Tab Bar -->
+<nav class="tab-bar" id="tabBar">
+  <button class="tab active" data-page="delivery">
+    <span class="tab-icon">📦</span>Deliver
+  </button>
+  <button class="tab" data-page="revenue">
+    <span class="tab-icon">💰</span>Payment
+  </button>
+  <button class="tab" data-page="expense" id="tab-expense">
+    <span class="tab-icon">📉</span>Expense
+  </button>
+  <button class="tab" data-page="mould" id="tab-mould">
+    <span class="tab-icon">🧱</span>Mould
+  </button>
+  <button class="tab" data-page="inventory">
+    <span class="tab-icon">📊</span>Stock
+  </button>
+  <button class="tab" data-page="admin" id="tab-admin" style="display:none">
+    <span class="tab-icon">⚙️</span>Admin
+  </button>
+</nav>
+
+<!-- ═══ DELIVERY PAGE ═══════════════════════════════════ -->
+<div class="page active" id="page-delivery">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <div class="card-title-icon">📦</div>
+        Record Delivery
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="field form-full">
+        <label>Customer Name *</label>
+        <input type="text" id="del_customer" placeholder="e.g. Kwame Mensah">
+      </div>
+      <div class="field">
+        <label>Contact</label>
+        <input type="tel" id="del_contact" placeholder="Phone number">
+      </div>
+      <div class="field">
+        <label>Block Size *</label>
+        <select id="del_size">
+          <option>5 inches Solid</option>
+          <option>5 inches Hollow</option>
+          <option>6 inches Solid</option>
+          <option>6 inches Hollow</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Quantity *</label>
+        <input type="number" id="del_qty" placeholder="Number of blocks" min="1">
+      </div>
+      <div class="field form-full">
+        <label>Delivery Location *</label>
+        <input type="text" id="del_location" placeholder="e.g. Ahodwo, Kumasi">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addDelivery()">✓ Record Delivery</button>
+  </div>
+
+  <div class="section-label">Recent Deliveries</div>
+  <div id="deliveryList">
+    <div class="card"><div class="empty-state"><div class="empty-icon">📦</div><p>No deliveries yet</p></div></div>
+  </div>
+</div>
+
+<!-- ═══ REVENUE PAGE ════════════════════════════════════ -->
+<div class="page" id="page-revenue">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <div class="card-title-icon">💰</div>
+        Record Payment
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="field form-full">
+        <label>Transaction Type *</label>
+        <select id="rev_type" onchange="toggleRevFields()">
+          <option>Blocks Sale</option>
+          <option>Other Income</option>
+        </select>
+      </div>
+      <div class="field form-full" id="rev_size_group">
+        <label>Block Size</label>
+        <select id="rev_size">
+          <option>5 inches Solid</option>
+          <option>5 inches Hollow</option>
+          <option>6 inches Solid</option>
+          <option>6 inches Hollow</option>
+        </select>
+      </div>
+      <div class="field form-full" id="rev_qty_group">
+        <label>Quantity Sold</label>
+        <input type="number" id="rev_qty" placeholder="Number of blocks sold" min="0">
+      </div>
+      <div class="field form-full" id="rev_desc_group" style="display:none">
+        <label>Description *</label>
+        <input type="text" id="rev_desc" placeholder="e.g. Transport fee, Labour">
+      </div>
+      <div class="field form-full">
+        <label>Amount (GHS) *</label>
+        <input type="number" step="any" id="rev_amount" placeholder="Enter amount in cedis">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addRevenue()">✓ Record Payment</button>
+  </div>
+
+  <div class="section-label">Recent Payments</div>
+  <div id="revenueList">
+    <div class="card"><div class="empty-state"><div class="empty-icon">💰</div><p>No payments yet</p></div></div>
+  </div>
+</div>
+
+<!-- ═══ EXPENSE PAGE ════════════════════════════════════ -->
+<div class="page" id="page-expense">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <div class="card-title-icon">📉</div>
+        Record Expense
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="field form-full">
+        <label>Expense Type *</label>
+        <select id="exp_type" onchange="toggleExpFields()">
+          <option>Loading</option>
+          <option>Diesel</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field form-full" id="exp_blocks_group">
+        <label>Number of Blocks Loaded</label>
+        <input type="number" id="exp_blocks" placeholder="e.g. 200">
+      </div>
+      <div class="field form-full" id="exp_desc_group" style="display:none">
+        <label>Description *</label>
+        <input type="text" id="exp_desc" placeholder="Describe the expense">
+      </div>
+      <div class="field form-full">
+        <label>Amount (GHS) *</label>
+        <input type="number" step="any" id="exp_amount" placeholder="Enter amount in cedis">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addExpense()">✓ Record Expense</button>
+  </div>
+
+  <div class="section-label">Recent Expenses</div>
+  <div id="expenseList">
+    <div class="card"><div class="empty-state"><div class="empty-icon">📉</div><p>No expenses yet</p></div></div>
+  </div>
+</div>
+
+<!-- ═══ MOULD PAGE ═══════════════════════════════════════ -->
+<div class="page" id="page-mould">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <div class="card-title-icon">🧱</div>
+        Record Production
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="field form-full">
+        <label>Block Size *</label>
+        <select id="mould_size" onchange="updateBlockCalc()">
+          <option>5 inches Solid</option>
+          <option>5 inches Hollow</option>
+          <option>6 inches Solid</option>
+          <option>6 inches Hollow</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Palettes *</label>
+        <input type="number" id="mould_palettes" placeholder="No. of palettes" onchange="updateBlockCalc()">
+      </div>
+      <div class="field">
+        <label>Cement Bags *</label>
+        <input type="number" id="mould_cement" placeholder="Bags used">
+      </div>
+      <div class="form-full">
+        <div class="hint" id="block_calc">📐 5-inch = 6 blocks/palette · 6-inch = 5 blocks/palette</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addMould()">✓ Record Production</button>
+  </div>
+
+  <div class="section-label">Recent Production Runs</div>
+  <div id="mouldList">
+    <div class="card"><div class="empty-state"><div class="empty-icon">🧱</div><p>No production recorded yet</p></div></div>
+  </div>
+</div>
+
+<!-- ═══ INVENTORY/STOCK PAGE ═════════════════════════════ -->
+<div class="page" id="page-inventory">
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card green">
+      <div class="stat-label">💰 Total Received</div>
+      <div class="stat-value" id="totalReceived">₵0</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">📉 Total Expenses</div>
+      <div class="stat-value" id="totalExpenses">₵0</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">📈 Net Profit</div>
+      <div class="stat-value" id="netProfit">₵0</div>
+    </div>
+  </div>
+
+  <div class="section-label">Block Inventory</div>
+  <div class="inv-grid" id="inventoryGrid"></div>
+</div>
+
+<!-- ═══ ADMIN PAGE (system_admin only) ══════════════════ -->
+<div class="page" id="page-admin">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <div class="card-title-icon">⚙️</div>
+        System Administration
+      </div>
+    </div>
+    <p style="font-size:0.82rem; color:var(--gray-600); margin-bottom:16px;">
+      Full access controls. Delete records, manage users, and review all system data.
+    </p>
+
+    <div class="section-label" style="margin-top:10px">Delete Records</div>
+    <p style="font-size:0.75rem; color:var(--gray-400); margin-bottom:12px;">Select a record type to view and delete entries.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <button class="btn btn-primary" style="margin:0" onclick="loadAdminList('deliveries')">📦 Deliveries</button>
+      <button class="btn btn-primary" style="margin:0" onclick="loadAdminList('revenues')">💰 Revenues</button>
+      <button class="btn btn-primary" style="margin:0" onclick="loadAdminList('expenses')">📉 Expenses</button>
+      <button class="btn btn-primary" style="margin:0" onclick="loadAdminList('moulds')">🧱 Production</button>
+    </div>
+  </div>
+  <div id="adminList"></div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast success"></div>
+
+<!-- Install banner -->
+<div class="install-banner" id="installBanner" onclick="installPWA()">
+  📲 Install PATCUS as App — Tap here
+</div>
+
+<script>
+// ─── State ──────────────────────────────────────────────────────
+let currentRole = '';
+let allData = null;
+let deferredPrompt = null;
+
+// ─── Toast ──────────────────────────────────────────────────────
+function toast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + (isError ? 'error' : 'success');
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+// ─── Tabs ──────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const p = tab.dataset.page;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    const pg = document.getElementById('page-' + p);
+    if (pg) pg.classList.add('active');
+  });
+});
+
+// ─── Format helpers ─────────────────────────────────────────────
+function fmtCedi(n) {
+  if (n >= 1000) return '₵' + (n/1000).toFixed(1) + 'k';
+  return '₵' + Number(n).toFixed(2);
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return d.length > 10 ? d.substring(0,16) : d;
+}
+
+// ─── Toggle fields ───────────────────────────────────────────────
+function toggleRevFields() {
+  const t = document.getElementById('rev_type').value;
+  document.getElementById('rev_size_group').style.display = t === 'Blocks Sale' ? 'flex' : 'none';
+  document.getElementById('rev_qty_group').style.display  = t === 'Blocks Sale' ? 'flex' : 'none';
+  document.getElementById('rev_desc_group').style.display = t === 'Other Income' ? 'flex' : 'none';
+}
+
+function toggleExpFields() {
+  const t = document.getElementById('exp_type').value;
+  document.getElementById('exp_blocks_group').style.display = t === 'Loading' ? 'flex' : 'none';
+  document.getElementById('exp_desc_group').style.display   = t === 'Other' ? 'flex' : 'none';
+}
+
+function updateBlockCalc() {
+  const size = document.getElementById('mould_size').value;
+  const pal  = parseInt(document.getElementById('mould_palettes').value) || 0;
+  const bpp  = size.includes('5') ? 6 : 5;
+  const total = pal * bpp;
+  document.getElementById('block_calc').textContent =
+    pal > 0
+      ? `📐 ${pal} palettes × ${bpp} blocks = ${total} blocks total`
+      : `📐 5-inch = 6 blocks/palette · 6-inch = 5 blocks/palette`;
+}
+
+// ─── API ─────────────────────────────────────────────────────────
+async function api(endpoint, data) {
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return await res.json();
+  } catch {
+    toast('Network error!', true);
+    return null;
+  }
+}
+
+// ─── Add Delivery ────────────────────────────────────────────────
+async function addDelivery() {
+  const customer = document.getElementById('del_customer').value.trim();
+  if (!customer) return toast('Customer name is required!', true);
+  const qty = parseInt(document.getElementById('del_qty').value);
+  if (!qty || qty <= 0) return toast('Please enter a valid quantity!', true);
+  const location = document.getElementById('del_location').value.trim();
+  if (!location) return toast('Delivery location is required!', true);
+
+  const r = await api('/api/add_delivery', {
+    customer, qty,
+    contact:  document.getElementById('del_contact').value.trim(),
+    size:     document.getElementById('del_size').value,
+    quantity: qty,
+    location
+  });
+  if (r?.success) {
+    toast('✓ Delivery recorded successfully!');
+    document.getElementById('del_customer').value = '';
+    document.getElementById('del_contact').value  = '';
+    document.getElementById('del_qty').value      = '';
+    document.getElementById('del_location').value = '';
+    loadData();
+  } else toast(r?.error || 'Failed to record delivery', true);
+}
+
+// ─── Add Revenue ─────────────────────────────────────────────────
+async function addRevenue() {
+  const type   = document.getElementById('rev_type').value;
+  const amount = parseFloat(document.getElementById('rev_amount').value);
+  if (!amount || amount <= 0) return toast('Please enter a valid amount!', true);
+
+  const data = { type, amount };
+  if (type === 'Blocks Sale') {
+    data.size     = document.getElementById('rev_size').value;
+    data.quantity = parseInt(document.getElementById('rev_qty').value) || 0;
+  } else {
+    const desc = document.getElementById('rev_desc').value.trim();
+    if (!desc) return toast('Description is required!', true);
+    data.description = desc;
+  }
+
+  const r = await api('/api/add_revenue', data);
+  if (r?.success) {
+    toast('✓ Payment recorded!');
+    document.getElementById('rev_amount').value = '';
+    document.getElementById('rev_qty').value    = '';
+    document.getElementById('rev_desc').value   = '';
+    loadData();
+  } else toast(r?.error || 'Failed to record payment', true);
+}
+
+// ─── Add Expense ─────────────────────────────────────────────────
+async function addExpense() {
+  const type   = document.getElementById('exp_type').value;
+  const amount = parseFloat(document.getElementById('exp_amount').value);
+  if (!amount || amount <= 0) return toast('Please enter a valid amount!', true);
+
+  const data = { type, amount };
+  if (type === 'Loading') {
+    data.blocks = parseInt(document.getElementById('exp_blocks').value) || 0;
+  } else if (type === 'Other') {
+    const desc = document.getElementById('exp_desc').value.trim();
+    if (!desc) return toast('Description is required!', true);
+    data.description = desc;
+  }
+
+  const r = await api('/api/add_expense', data);
+  if (r?.success) {
+    toast('✓ Expense recorded!');
+    document.getElementById('exp_amount').value = '';
+    document.getElementById('exp_blocks').value = '';
+    document.getElementById('exp_desc').value   = '';
+    loadData();
+  } else toast(r?.error || 'Permission denied', true);
+}
+
+// ─── Add Mould ───────────────────────────────────────────────────
+async function addMould() {
+  const palettes = parseInt(document.getElementById('mould_palettes').value);
+  const cement   = parseInt(document.getElementById('mould_cement').value);
+  if (!palettes || palettes <= 0) return toast('Please enter a valid palette count!', true);
+  if (!cement   || cement   <= 0) return toast('Please enter cement bags used!', true);
+
+  const r = await api('/api/add_mould', {
+    size: document.getElementById('mould_size').value,
+    palettes, cement
+  });
+  if (r?.success) {
+    toast('✓ Production recorded!');
+    document.getElementById('mould_palettes').value = '';
+    document.getElementById('mould_cement').value   = '';
+    document.getElementById('block_calc').textContent = '📐 5-inch = 6 blocks/palette · 6-inch = 5 blocks/palette';
+    loadData();
+  } else toast(r?.error || 'Permission denied', true);
+}
+
+// ─── Render Tables ───────────────────────────────────────────────
+function renderDeliveries(data) {
+  const isAdmin = currentRole === 'system_admin';
+  if (!data.deliveries.length) {
+    document.getElementById('deliveryList').innerHTML =
+      '<div class="card"><div class="empty-state"><div class="empty-icon">📦</div><p>No deliveries recorded yet</p></div></div>';
+    return;
+  }
+  let rows = [...data.deliveries].reverse().slice(0,50).map((d, ri) => {
+    const origIdx = data.deliveries.length - 1 - ri;
+    return `<tr>
+      <td>${fmtDate(d.date)}</td>
+      <td><strong>${d.customer}</strong><br><small style="color:var(--gray-400)">${d.location || ''}</small></td>
+      <td><span class="badge badge-green">${d.size}</span></td>
+      <td><strong>${d.quantity}</strong></td>
+      ${isAdmin ? `<td><button class="btn btn-danger" onclick="deleteRecord('delivery',${origIdx})">🗑</button></td>` : ''}
+    </tr>`;
+  }).join('');
+  document.getElementById('deliveryList').innerHTML = `
+    <div class="card">
+      <div class="card-header"><div class="card-title"><div class="card-title-icon">📋</div>Delivery History</div></div>
+      <div class="history-scroll">
+        <table class="history-table">
+          <tr><th>Date</th><th>Customer</th><th>Size</th><th>Qty</th>${isAdmin ? '<th></th>' : ''}</tr>
+          ${rows}
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderRevenues(data) {
+  const isAdmin = currentRole === 'system_admin';
+  if (!data.revenues.length) {
+    document.getElementById('revenueList').innerHTML =
+      '<div class="card"><div class="empty-state"><div class="empty-icon">💰</div><p>No payments recorded yet</p></div></div>';
+    return;
+  }
+  let rows = [...data.revenues].reverse().slice(0,50).map((r, ri) => {
+    const origIdx = data.revenues.length - 1 - ri;
+    return `<tr>
+      <td>${fmtDate(r.date)}</td>
+      <td><span class="badge ${r.type==='Blocks Sale'?'badge-green':'badge-gold'}">${r.type}</span></td>
+      <td>${r.size || (r.desc || '—')}</td>
+      <td>${r.quantity > 0 ? r.quantity : '—'}</td>
+      <td><strong style="color:var(--green-700)">₵${Number(r.amount).toFixed(2)}</strong></td>
+      ${isAdmin ? `<td><button class="btn btn-danger" onclick="deleteRecord('revenue',${origIdx})">🗑</button></td>` : ''}
+    </tr>`;
+  }).join('');
+  document.getElementById('revenueList').innerHTML = `
+    <div class="card">
+      <div class="card-header"><div class="card-title"><div class="card-title-icon">💰</div>Payment History</div></div>
+      <div class="history-scroll">
+        <table class="history-table">
+          <tr><th>Date</th><th>Type</th><th>Details</th><th>Qty</th><th>Amount</th>${isAdmin ? '<th></th>' : ''}</tr>
+          ${rows}
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderExpenses(data) {
+  const isAdmin = currentRole === 'system_admin';
+  if (!data.expenses.length) {
+    document.getElementById('expenseList').innerHTML =
+      '<div class="card"><div class="empty-state"><div class="empty-icon">📉</div><p>No expenses recorded yet</p></div></div>';
+    return;
+  }
+  let rows = [...data.expenses].reverse().slice(0,50).map((e, ri) => {
+    const origIdx = data.expenses.length - 1 - ri;
+    return `<tr>
+      <td>${fmtDate(e.date)}</td>
+      <td><span class="badge badge-red">${e.category}</span></td>
+      <td>${e.desc || '—'}</td>
+      <td><strong style="color:var(--red)">₵${Number(e.amount).toFixed(2)}</strong></td>
+      ${isAdmin ? `<td><button class="btn btn-danger" onclick="deleteRecord('expense',${origIdx})">🗑</button></td>` : ''}
+    </tr>`;
+  }).join('');
+  document.getElementById('expenseList').innerHTML = `
+    <div class="card">
+      <div class="card-header"><div class="card-title"><div class="card-title-icon">📉</div>Expense History</div></div>
+      <div class="history-scroll">
+        <table class="history-table">
+          <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th>${isAdmin ? '<th></th>' : ''}</tr>
+          ${rows}
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderMoulds(data) {
+  const isAdmin = currentRole === 'system_admin';
+  if (!data.moulds.length) {
+    document.getElementById('mouldList').innerHTML =
+      '<div class="card"><div class="empty-state"><div class="empty-icon">🧱</div><p>No production runs recorded yet</p></div></div>';
+    return;
+  }
+  let rows = [...data.moulds].reverse().slice(0,50).map((m, ri) => {
+    const origIdx = data.moulds.length - 1 - ri;
+    const blocks = m.total_blocks || (m.palettes * (m.size.includes('5') ? 6 : 5));
+    return `<tr>
+      <td>${fmtDate(m.date)}</td>
+      <td><span class="badge badge-green">${m.size}</span></td>
+      <td>${m.palettes}</td>
+      <td><strong>${blocks}</strong></td>
+      <td>${m.cement}</td>
+      ${isAdmin ? `<td><button class="btn btn-danger" onclick="deleteRecord('mould',${origIdx})">🗑</button></td>` : ''}
+    </tr>`;
+  }).join('');
+  document.getElementById('mouldList').innerHTML = `
+    <div class="card">
+      <div class="card-header"><div class="card-title"><div class="card-title-icon">🧱</div>Production History</div></div>
+      <div class="history-scroll">
+        <table class="history-table">
+          <tr><th>Date</th><th>Size</th><th>Palettes</th><th>Blocks</th><th>Cement</th>${isAdmin ? '<th></th>' : ''}</tr>
+          ${rows}
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderInventory(data) {
+  // Stats
+  document.getElementById('totalReceived').textContent = fmtCedi(data.stats.total_received);
+  document.getElementById('totalExpenses').textContent = fmtCedi(data.stats.total_expenses);
+  document.getElementById('netProfit').textContent     = fmtCedi(data.stats.net_profit);
+
+  // Inventory grid
+  const inv = data.inventory;
+  let html = '';
+  for (const bt in inv) {
+    const rem = inv[bt].remaining;
+    const cls = rem < 50 ? 'low' : 'ok';
+    html += `<div class="inv-item ${cls}">
+      <div class="inv-type">${bt}</div>
+      <div class="inv-remaining">${rem}</div>
+      <div class="inv-remaining-label">blocks remaining</div>
+      <div class="inv-row">
+        <span>Moulded</span><strong>${inv[bt].moulded}</strong>
+      </div>
+      <div class="inv-row" style="margin-top:4px">
+        <span>Delivered</span><strong>${inv[bt].delivered}</strong>
+      </div>
+    </div>`;
+  }
+  document.getElementById('inventoryGrid').innerHTML = html;
+}
+
+// ─── Load Data ───────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const res  = await fetch('/api/get_data');
+    const data = await res.json();
+    if (data.error) { window.location.href = '/'; return; }
+    allData = data;
+    currentRole = data.role;
+
+    // User bar
+    const roleLabels = {
+      system_admin: 'System Administrator',
+      manager: 'Manager',
+      sales: 'Sales'
+    };
+    document.getElementById('userName').textContent = data.user_name;
+    const badge = document.getElementById('roleBadge');
+    badge.textContent = roleLabels[data.role] || data.role;
+    badge.className = 'role-badge ' + data.role;
+
+    // Show/hide tabs based on role
+    const isMgrPlus = ['system_admin', 'manager'].includes(data.role);
+    const isAdmin   = data.role === 'system_admin';
+    // All roles can see Expense and Mould tabs
+    document.getElementById('tab-expense').style.display = '';
+    document.getElementById('tab-mould').style.display   = '';
+    document.getElementById('tab-admin').style.display   = isAdmin   ? '' : 'none';
+
+    renderDeliveries(data);
+    renderRevenues(data);
+    renderExpenses(data);
+    renderMoulds(data);
+    renderInventory(data);
+  } catch (e) {
+    console.error('loadData error:', e);
+  }
+}
+
+// ─── Delete (system admin only) ──────────────────────────────────
+async function deleteRecord(type, index) {
+  if (!confirm(`Delete this ${type} record? This cannot be undone.`)) return;
+  const endpoints = {
+    delivery: '/api/delete_delivery',
+    revenue:  '/api/delete_revenue',
+    expense:  '/api/delete_expense',
+    mould:    '/api/delete_mould'
+  };
+  const r = await api(endpoints[type], { index });
+  if (r?.success) {
+    toast(`✓ ${type} record deleted`);
+    loadData();
+    document.getElementById('adminList').innerHTML = '';
+  } else toast(r?.error || 'Delete failed', true);
+}
+
+// ─── Admin list view ─────────────────────────────────────────────
+function loadAdminList(type) {
+  if (!allData) return;
+  const maps = {
+    deliveries: {
+      data: allData.deliveries,
+      cols: ['Date','Customer','Size','Qty','Location'],
+      row:  d => [fmtDate(d.date), d.customer, d.size, d.quantity, d.location || '—']
+    },
+    revenues: {
+      data: allData.revenues,
+      cols: ['Date','Type','Details','Amount'],
+      row:  r => [fmtDate(r.date), r.type, r.size || r.desc || '—', '₵'+Number(r.amount).toFixed(2)]
+    },
+    expenses: {
+      data: allData.expenses,
+      cols: ['Date','Category','Description','Amount'],
+      row:  e => [fmtDate(e.date), e.category, e.desc || '—', '₵'+Number(e.amount).toFixed(2)]
+    },
+    moulds: {
+      data: allData.moulds,
+      cols: ['Date','Size','Palettes','Blocks','Cement'],
+      row:  m => [fmtDate(m.date), m.size, m.palettes, m.total_blocks || '—', m.cement]
+    }
+  };
+
+  const cfg = maps[type];
+  if (!cfg.data.length) {
+    document.getElementById('adminList').innerHTML =
+      `<div class="card"><div class="empty-state"><p>No ${type} records found</p></div></div>`;
+    return;
+  }
+
+  const apiType = {deliveries:'delivery', revenues:'revenue', expenses:'expense', moulds:'mould'}[type];
+  let rows = [...cfg.data].reverse().map((item, ri) => {
+    const origIdx = cfg.data.length - 1 - ri;
+    const cells = cfg.row(item).map(c => `<td>${c}</td>`).join('');
+    return `<tr>${cells}<td><button class="btn btn-danger" onclick="deleteRecord('${apiType}',${origIdx})">🗑 Delete</button></td></tr>`;
+  }).join('');
+
+  const ths = [...cfg.cols, ''].map(c => `<th>${c}</th>`).join('');
+  document.getElementById('adminList').innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-title-icon">📋</div>${type.charAt(0).toUpperCase()+type.slice(1)} Records (${cfg.data.length})</div>
+      </div>
+      <div class="history-scroll">
+        <table class="history-table"><tr>${ths}</tr>${rows}</table>
+      </div>
+    </div>`;
+}
+
+// ─── Logout ──────────────────────────────────────────────────────
+async function doLogout() {
+  await fetch('/logout');
+  window.location.href = '/';
+}
+
+// ─── PWA ─────────────────────────────────────────────────────────
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('installBanner').classList.remove('show');
+    });
+  }
+}
+
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  document.getElementById('installBanner').style.display = 'none';
+}
+
+// ─── Init ────────────────────────────────────────────────────────
+loadData();
+setInterval(loadData, 15000);
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+}
+</script>
+</body>
+</html>

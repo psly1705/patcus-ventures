@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a1f16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>PATCUS VENTURES — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-900: #0a1f16;
+    --green-800: #0f2b22;
+    --green-700: #1a3d2e;
+    --green-600: #1e4a38;
+    --gold: #f9b81b;
+    --gold-light: #fdd96a;
+    --white: #ffffff;
+    --gray-100: #f4f5f3;
+    --gray-400: #9ca8a0;
+    --red: #c44536;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--green-900);
+    overflow: hidden;
+    padding: 20px;
+  }
+
+  /* Animated background */
+  .bg-pattern {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 10% 90%, rgba(249,184,27,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 90% 10%, rgba(30,74,56,0.6) 0%, transparent 60%),
+      var(--green-900);
+  }
+
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(249,184,27,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(249,184,27,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .card-wrap {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 420px;
+  }
+
+  .card {
+    background: linear-gradient(160deg, rgba(30,74,56,0.55), rgba(10,31,22,0.85));
+    border: 1px solid rgba(249,184,27,0.2);
+    border-radius: 28px;
+    padding: 44px 40px 40px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset;
+    animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .logo-row {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .logo-icon {
+    width: 54px; height: 54px;
+    background: var(--gold);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(249,184,27,0.35);
+  }
+
+  .logo-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 1px;
+    line-height: 1.1;
+  }
+
+  .logo-text p {
+    font-size: 0.72rem;
+    color: var(--gray-400);
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(249,184,27,0.25), transparent);
+    margin-bottom: 30px;
+  }
+
+  .welcome {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--white);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .welcome-sub {
+    font-size: 0.82rem;
+    color: var(--gray-400);
+    margin-bottom: 28px;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gray-400);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+
+  .input-icon {
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px; opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 14px 14px 14px 44px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .field input::placeholder { color: rgba(255,255,255,0.25); }
+
+  .field input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: rgba(249,184,27,0.06);
+  }
+
+  .btn-login {
+    width: 100%;
+    padding: 15px;
+    background: var(--gold);
+    color: var(--green-900);
+    border: none;
+    border-radius: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+    box-shadow: 0 4px 20px rgba(249,184,27,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-login::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.15);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .btn-login:hover::after { opacity: 1; }
+  .btn-login:active { transform: scale(0.98); }
+
+  .btn-login.loading {
+    pointer-events: none;
+    opacity: 0.8;
+  }
+
+  .error-msg {
+    display: none;
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: rgba(196,69,54,0.15);
+    border: 1px solid rgba(196,69,54,0.4);
+    border-radius: 10px;
+    color: #ff8070;
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  .footer-note {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.18);
+    letter-spacing: 0.3px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="bg-grid"></div>
+
+<div class="card-wrap">
+  <div class="card">
+    <div class="logo-row">
+      <div class="logo-icon">🏭</div>
+      <div class="logo-text">
+        <h1>PATCUS VENTURES</h1>
+        <p>BLOCK FACTORY MANAGEMENT SYSTEM</p>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="welcome">Welcome back</div>
+    <div class="welcome-sub">Sign in to your account to continue</div>
+
+    <div class="field">
+      <label>Username</label>
+      <div class="input-wrap">
+        <span class="input-icon">👤</span>
+        <input type="text" id="username" placeholder="Enter your username" autocomplete="off" autocapitalize="none">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="password" placeholder="Enter your password">
+      </div>
+    </div>
+
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">SIGN IN</button>
+    <div class="error-msg" id="errMsg">⚠ Invalid username or password. Please try again.</div>
+  </div>
+  <div class="footer-note">© 2025 Patcus Ventures · All rights reserved</div>
+</div>
+
+<script>
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+  document.getElementById('username').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('password').focus();
+  });
+
+  async function doLogin() {
+    const btn = document.getElementById('loginBtn');
+    const err = document.getElementById('errMsg');
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value;
+
+    if (!user || !pass) {
+      err.style.display = 'block';
+      err.textContent = '⚠ Please enter both username and password.';
+      return;
+    }
+
+    btn.classList.add('loading');
+    btn.textContent = 'Signing in…';
+    err.style.display = 'none';
+
+    try {
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`
+      });
+      const data = await res.json();
+      if (data.success) {
+        btn.textContent = '✓ Welcome, ' + data.name + '!';
+        setTimeout(() => { window.location.href = '/'; }, 600);
+      } else {
+        btn.classList.remove('loading');
+        btn.textContent = 'SIGN IN';
+        err.style.display = 'block';
+        err.textContent = '⚠ Invalid username or password. Please try again.';
+        document.getElementById('password').value = '';
+        document.getElementById('password').focus();
+      }
+    } catch (e) {
+      btn.classList.remove('loading');
+      btn.textContent = 'SIGN IN';
+      err.style.display = 'block';
+      err.textContent = '⚠ Network error. Please check your connection.';
+    }
+  }
+</script>
+</body>
+</html>
