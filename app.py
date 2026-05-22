@@ -1,52 +1,118 @@
 """
 PATCUS VENTURES - PWA Server
 Block Factory Management System
+SQLite version — data survives server restarts on Render
 """
 
 from flask import Flask, render_template, request, jsonify, session, send_from_directory, redirect
-import json
+import sqlite3
 import os
 from datetime import datetime
-from collections import defaultdict
 
 app = Flask(__name__, template_folder='.')
-app.secret_key = 'patcus_secret_key_2025_secure'
+app.secret_key = os.environ.get('SECRET_KEY', 'patcus_secret_key_2025_secure')
 
-# ── Data paths ─────────────────────────────────────────────────────────────
-DATA_DIR = "patcus_data"
-os.makedirs(DATA_DIR, exist_ok=True)
+# ── Database path ──────────────────────────────────────────────────
+# On Render with a Persistent Disk, mount it at /data and set
+# the DATABASE_PATH env var to /data/patcus.db
+# Otherwise it stores next to app.py (fine for local use)
+DB_PATH = os.environ.get('DATABASE_PATH', 'patcus.db')
 
-DELIVERIES_FILE = os.path.join(DATA_DIR, "deliveries.json")
-REVENUES_FILE   = os.path.join(DATA_DIR, "revenues.json")
-EXPENSES_FILE   = os.path.join(DATA_DIR, "expenses.json")
-MOULDS_FILE     = os.path.join(DATA_DIR, "moulds.json")
-USERS_FILE      = os.path.join(DATA_DIR, "users.json")
+BLOCK_SIZES = ['5 inches Solid', '5 inches Hollow', '6 inches Solid', '6 inches Hollow']
 
-# ── Users:
-#    sylvester = system_admin  (full access, all permissions)
-#    nanapoku  = manager       (can add data, view reports, NO delete)
-#    sales1    = sales         (can add deliveries & revenue only)
 DEFAULT_USERS = {
     "sylvester": {"password": "osei17",   "role": "system_admin", "name": "Osei Sylvester"},
     "nanapoku":  {"password": "patcus17", "role": "manager",      "name": "Nana Osei Poku Brempong"},
     "benjamin":  {"password": "benji45",  "role": "sales",        "name": "Benjamin"},
 }
 
-BLOCK_SIZES = ['5 inches Solid', '5 inches Hollow', '6 inches Solid', '6 inches Hollow']
+# ── Database setup ─────────────────────────────────────────────────
+def get_db():
+    """Open a database connection for the current request."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row   # rows behave like dicts
+    return conn
 
-# ── Helpers ────────────────────────────────────────────────────────────────
-def load_data(filename, default):
-    if os.path.exists(filename):
-        try:
-            with open(filename, 'r') as f:
-                return json.load(f)
-        except Exception:
-            return default
-    return default
+def init_db():
+    """Create all tables if they don't exist, seed default users."""
+    conn = get_db()
+    c = conn.cursor()
 
-def save_data(filename, data):
-    with open(filename, 'w') as f:
-        json.dump(data, f, indent=2)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            username TEXT PRIMARY KEY,
+            password TEXT NOT NULL,
+            role     TEXT NOT NULL,
+            name     TEXT NOT NULL
+        )
+    ''')
+
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS deliveries (
+            id       INTEGER PRIMARY KEY AUTOINCREMENT,
+            date     TEXT NOT NULL,
+            customer TEXT NOT NULL,
+            contact  TEXT,
+            size     TEXT NOT NULL,
+            quantity INTEGER NOT NULL,
+            location TEXT,
+            by       TEXT
+        )
+    ''')
+
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS revenues (
+            id       INTEGER PRIMARY KEY AUTOINCREMENT,
+            date     TEXT NOT NULL,
+            type     TEXT NOT NULL,
+            size     TEXT,
+            quantity INTEGER DEFAULT 0,
+            amount   REAL NOT NULL,
+            desc     TEXT,
+            by       TEXT
+        )
+    ''')
+
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS expenses (
+            id       INTEGER PRIMARY KEY AUTOINCREMENT,
+            date     TEXT NOT NULL,
+            category TEXT NOT NULL,
+            desc     TEXT,
+            blocks   INTEGER DEFAULT 0,
+            amount   REAL NOT NULL,
+            by       TEXT
+        )
+    ''')
+
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS moulds (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            date         TEXT NOT NULL,
+            size         TEXT NOT NULL,
+            palettes     INTEGER NOT NULL,
+            total_blocks INTEGER NOT NULL,
+            cement       INTEGER NOT NULL,
+            by           TEXT
+        )
+    ''')
+
+    # Seed / update default users
+    for uname, udata in DEFAULT_USERS.items():
+        existing = c.execute('SELECT username FROM users WHERE username=?', (uname,)).fetchone()
+        if existing:
+            # Update name and role but never overwrite a custom password
+            c.execute('UPDATE users SET name=?, role=? WHERE username=?',
+                      (udata['name'], udata['role'], uname))
+        else:
+            c.execute('INSERT INTO users (username, password, role, name) VALUES (?,?,?,?)',
+                      (uname, udata['password'], udata['role'], udata['name']))
+
+    # Remove old sales1 account if it migrated in somehow
+    c.execute("DELETE FROM users WHERE username='sales1'")
+
+    conn.commit()
+    conn.close()
 
 def today_str():
     return datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -54,31 +120,13 @@ def today_str():
 def is_system_admin():
     return session.get('role') == 'system_admin'
 
-def is_manager_or_above():
-    return session.get('role') in ('system_admin', 'manager')
-
 def logged_in():
     return 'username' in session
 
-if not os.path.exists(USERS_FILE):
-    save_data(USERS_FILE, DEFAULT_USERS)
-else:
-    # Merge: add new users and remove old ones not in DEFAULT_USERS
-    existing = load_data(USERS_FILE, {})
-    # Remove old sales1 account if present, add benjamin
-    if 'sales1' in existing:
-        del existing['sales1']
-    # Ensure all default users exist with correct names/roles
-    for uname, udata in DEFAULT_USERS.items():
-        if uname not in existing:
-            existing[uname] = udata
-        else:
-            # Update name and role but keep custom password if set
-            existing[uname]['name'] = udata['name']
-            existing[uname]['role'] = udata['role']
-    save_data(USERS_FILE, existing)
+# Initialise DB on startup
+init_db()
 
-# ── Routes ─────────────────────────────────────────────────────────────────
+# ── Static file routes ─────────────────────────────────────────────
 @app.route('/')
 def index():
     if not logged_in():
@@ -97,16 +145,18 @@ def sw():
 def static_files(filename):
     return send_from_directory('static', filename)
 
+# ── Auth ───────────────────────────────────────────────────────────
 @app.route('/login', methods=['POST'])
 def login():
-    users = load_data(USERS_FILE, DEFAULT_USERS)
     username = request.form.get('username', '').strip().lower()
     password = request.form.get('password', '')
-
-    if username in users and users[username]['password'] == password:
+    conn = get_db()
+    user = conn.execute('SELECT * FROM users WHERE username=?', (username,)).fetchone()
+    conn.close()
+    if user and user['password'] == password:
         session['username']  = username
-        session['role']      = users[username]['role']
-        session['user_name'] = users[username]['name']
+        session['role']      = user['role']
+        session['user_name'] = user['name']
         return jsonify({'success': True, 'role': session['role'], 'name': session['user_name']})
     return jsonify({'success': False, 'error': 'Invalid username or password'})
 
@@ -115,38 +165,54 @@ def logout():
     session.clear()
     return redirect('/')
 
-# ── Get all data ───────────────────────────────────────────────────────────
+# ── Get all data ───────────────────────────────────────────────────
 @app.route('/api/get_data')
 def get_data():
     if not logged_in():
         return jsonify({'error': 'Not logged in'}), 401
 
-    deliveries = load_data(DELIVERIES_FILE, [])
-    revenues   = load_data(REVENUES_FILE, [])
-    expenses   = load_data(EXPENSES_FILE, [])
-    moulds     = load_data(MOULDS_FILE, [])
+    conn = get_db()
 
+    deliveries = [dict(r) for r in conn.execute(
+        'SELECT * FROM deliveries ORDER BY id DESC LIMIT 200').fetchall()]
+    revenues   = [dict(r) for r in conn.execute(
+        'SELECT * FROM revenues ORDER BY id DESC LIMIT 200').fetchall()]
+    expenses   = [dict(r) for r in conn.execute(
+        'SELECT * FROM expenses ORDER BY id DESC LIMIT 200').fetchall()]
+    moulds     = [dict(r) for r in conn.execute(
+        'SELECT * FROM moulds ORDER BY id DESC LIMIT 200').fetchall()]
+
+    # Inventory per block size
     inventory = {}
     for bt in BLOCK_SIZES:
-        delivered = sum(d['quantity'] for d in deliveries if d.get('size') == bt)
-        moulded   = sum(m.get('total_blocks', 0) for m in moulds if m.get('size') == bt)
+        delivered = conn.execute(
+            'SELECT COALESCE(SUM(quantity),0) FROM deliveries WHERE size=?', (bt,)).fetchone()[0]
+        moulded   = conn.execute(
+            'SELECT COALESCE(SUM(total_blocks),0) FROM moulds WHERE size=?', (bt,)).fetchone()[0]
         inventory[bt] = {
             'delivered': delivered,
             'moulded':   moulded,
             'remaining': moulded - delivered
         }
 
-    total_rev = sum(r.get('amount', 0) for r in revenues)
-    total_exp = sum(e.get('amount', 0) for e in expenses)
+    total_rev = conn.execute('SELECT COALESCE(SUM(amount),0) FROM revenues').fetchone()[0]
+    total_exp = conn.execute('SELECT COALESCE(SUM(amount),0) FROM expenses').fetchone()[0]
+    conn.close()
+
+    # Reverse lists so newest is last (matches original frontend expectation)
+    deliveries.reverse()
+    revenues.reverse()
+    expenses.reverse()
+    moulds.reverse()
 
     return jsonify({
-        'user_name':   session.get('user_name'),
-        'role':        session.get('role'),
-        'deliveries':  deliveries[-200:],
-        'revenues':    revenues[-200:],
-        'expenses':    expenses[-200:],
-        'moulds':      moulds[-200:],
-        'inventory':   inventory,
+        'user_name':  session.get('user_name'),
+        'role':       session.get('role'),
+        'deliveries': deliveries,
+        'revenues':   revenues,
+        'expenses':   expenses,
+        'moulds':     moulds,
+        'inventory':  inventory,
         'stats': {
             'total_received': total_rev,
             'total_expenses': total_exp,
@@ -154,23 +220,20 @@ def get_data():
         }
     })
 
-# ── Add operations ─────────────────────────────────────────────────────────
+# ── Add operations ─────────────────────────────────────────────────
 @app.route('/api/add_delivery', methods=['POST'])
 def add_delivery():
     if not logged_in():
         return jsonify({'success': False, 'error': 'Not logged in'})
     data = request.json
-    deliveries = load_data(DELIVERIES_FILE, [])
-    deliveries.append({
-        'date':     today_str(),
-        'customer': data.get('customer'),
-        'contact':  data.get('contact', ''),
-        'size':     data.get('size'),
-        'quantity': data.get('quantity'),
-        'location': data.get('location', ''),
-        'by':       session['username']
-    })
-    save_data(DELIVERIES_FILE, deliveries)
+    conn = get_db()
+    conn.execute(
+        'INSERT INTO deliveries (date, customer, contact, size, quantity, location, by) VALUES (?,?,?,?,?,?,?)',
+        (today_str(), data.get('customer'), data.get('contact',''),
+         data.get('size'), data.get('quantity'), data.get('location',''), session['username'])
+    )
+    conn.commit()
+    conn.close()
     return jsonify({'success': True})
 
 @app.route('/api/add_revenue', methods=['POST'])
@@ -178,38 +241,29 @@ def add_revenue():
     if not logged_in():
         return jsonify({'success': False})
     data = request.json
-    revenues = load_data(REVENUES_FILE, [])
+    conn = get_db()
     if data.get('type') == 'Blocks Sale':
-        rec = {
-            'date':     today_str(),
-            'type':     'Blocks Sale',
-            'size':     data.get('size'),
-            'quantity': data.get('quantity', 0),
-            'amount':   data.get('amount', 0),
-            'desc':     '',
-            'by':       session['username']
-        }
+        conn.execute(
+            'INSERT INTO revenues (date, type, size, quantity, amount, desc, by) VALUES (?,?,?,?,?,?,?)',
+            (today_str(), 'Blocks Sale', data.get('size'), data.get('quantity', 0),
+             data.get('amount', 0), '', session['username'])
+        )
     else:
-        rec = {
-            'date':     today_str(),
-            'type':     'Other Income',
-            'size':     '',
-            'quantity': 0,
-            'amount':   data.get('amount', 0),
-            'desc':     data.get('description', ''),
-            'by':       session['username']
-        }
-    revenues.append(rec)
-    save_data(REVENUES_FILE, revenues)
+        conn.execute(
+            'INSERT INTO revenues (date, type, size, quantity, amount, desc, by) VALUES (?,?,?,?,?,?,?)',
+            (today_str(), 'Other Income', '', 0,
+             data.get('amount', 0), data.get('description', ''), session['username'])
+        )
+    conn.commit()
+    conn.close()
     return jsonify({'success': True})
 
 @app.route('/api/add_expense', methods=['POST'])
 def add_expense():
     if not logged_in():
         return jsonify({'success': False})
-    data = request.json
-    expenses = load_data(EXPENSES_FILE, [])
-    etype  = data.get('type')
+    data  = request.json
+    etype = data.get('type')
     blocks = data.get('blocks', 0)
     if etype == 'Loading':
         desc = f"Loading – {blocks} blocks" if blocks else "Loading"
@@ -217,113 +271,108 @@ def add_expense():
         desc = data.get('description', 'Other Expense')
     else:
         desc = "Diesel"
-    expenses.append({
-        'date':     today_str(),
-        'category': etype,
-        'desc':     desc,
-        'blocks':   blocks,
-        'amount':   data.get('amount'),
-        'by':       session['username']
-    })
-    save_data(EXPENSES_FILE, expenses)
+    conn = get_db()
+    conn.execute(
+        'INSERT INTO expenses (date, category, desc, blocks, amount, by) VALUES (?,?,?,?,?,?)',
+        (today_str(), etype, desc, blocks, data.get('amount'), session['username'])
+    )
+    conn.commit()
+    conn.close()
     return jsonify({'success': True})
 
 @app.route('/api/add_mould', methods=['POST'])
 def add_mould():
     if not logged_in():
         return jsonify({'success': False})
-    data    = request.json
-    moulds  = load_data(MOULDS_FILE, [])
-    size    = data.get('size')
+    data     = request.json
+    size     = data.get('size')
     palettes = data.get('palettes')
-    bpp     = 6 if '5' in size else 5
+    bpp      = 6 if '5' in size else 5
     total_blocks = palettes * bpp
-    moulds.append({
-        'date':         today_str(),
-        'size':         size,
-        'palettes':     palettes,
-        'total_blocks': total_blocks,
-        'cement':       data.get('cement'),
-        'by':           session['username']
-    })
-    save_data(MOULDS_FILE, moulds)
+    conn = get_db()
+    conn.execute(
+        'INSERT INTO moulds (date, size, palettes, total_blocks, cement, by) VALUES (?,?,?,?,?,?)',
+        (today_str(), size, palettes, total_blocks, data.get('cement'), session['username'])
+    )
+    conn.commit()
+    conn.close()
     return jsonify({'success': True})
 
-# ── Delete operations — System Admin only ──────────────────────────────────
+# ── Delete operations — System Admin only ──────────────────────────
 @app.route('/api/delete_delivery', methods=['POST'])
 def delete_delivery():
     if not is_system_admin():
         return jsonify({'success': False, 'error': 'System Administrator only'})
-    data       = request.json
-    deliveries = load_data(DELIVERIES_FILE, [])
-    idx        = data.get('index')
-    if idx is not None and 0 <= idx < len(deliveries):
-        deliveries.pop(idx)
-        save_data(DELIVERIES_FILE, deliveries)
+    row_id = request.json.get('index')  # frontend still calls it 'index' but we store real DB id
+    conn = get_db()
+    conn.execute('DELETE FROM deliveries WHERE id=?', (row_id,))
+    conn.commit()
+    conn.close()
     return jsonify({'success': True})
 
 @app.route('/api/delete_revenue', methods=['POST'])
 def delete_revenue():
     if not is_system_admin():
         return jsonify({'success': False, 'error': 'System Administrator only'})
-    data     = request.json
-    revenues = load_data(REVENUES_FILE, [])
-    idx      = data.get('index')
-    if idx is not None and 0 <= idx < len(revenues):
-        revenues.pop(idx)
-        save_data(REVENUES_FILE, revenues)
+    row_id = request.json.get('index')
+    conn = get_db()
+    conn.execute('DELETE FROM revenues WHERE id=?', (row_id,))
+    conn.commit()
+    conn.close()
     return jsonify({'success': True})
 
 @app.route('/api/delete_expense', methods=['POST'])
 def delete_expense():
     if not is_system_admin():
         return jsonify({'success': False, 'error': 'System Administrator only'})
-    data     = request.json
-    expenses = load_data(EXPENSES_FILE, [])
-    idx      = data.get('index')
-    if idx is not None and 0 <= idx < len(expenses):
-        expenses.pop(idx)
-        save_data(EXPENSES_FILE, expenses)
+    row_id = request.json.get('index')
+    conn = get_db()
+    conn.execute('DELETE FROM expenses WHERE id=?', (row_id,))
+    conn.commit()
+    conn.close()
     return jsonify({'success': True})
 
 @app.route('/api/delete_mould', methods=['POST'])
 def delete_mould():
     if not is_system_admin():
         return jsonify({'success': False, 'error': 'System Administrator only'})
-    data   = request.json
-    moulds = load_data(MOULDS_FILE, [])
-    idx    = data.get('index')
-    if idx is not None and 0 <= idx < len(moulds):
-        moulds.pop(idx)
-        save_data(MOULDS_FILE, moulds)
+    row_id = request.json.get('index')
+    conn = get_db()
+    conn.execute('DELETE FROM moulds WHERE id=?', (row_id,))
+    conn.commit()
+    conn.close()
     return jsonify({'success': True})
 
-# ── User management — System Admin only ───────────────────────────────────
+# ── User management — System Admin only ───────────────────────────
 @app.route('/api/get_users')
 def get_users():
     if not is_system_admin():
         return jsonify({'error': 'System Administrator only'}), 403
-    users = load_data(USERS_FILE, DEFAULT_USERS)
-    safe  = {u: {'name': v['name'], 'role': v['role']} for u, v in users.items()}
-    return jsonify(safe)
+    conn = get_db()
+    rows = conn.execute('SELECT username, name, role FROM users').fetchall()
+    conn.close()
+    return jsonify({r['username']: {'name': r['name'], 'role': r['role']} for r in rows})
 
 @app.route('/api/update_user', methods=['POST'])
 def update_user():
     if not is_system_admin():
         return jsonify({'success': False, 'error': 'System Administrator only'})
     data  = request.json
-    users = load_data(USERS_FILE, DEFAULT_USERS)
     uname = data.get('username')
-    if uname in users:
-        if data.get('password'):
-            users[uname]['password'] = data['password']
-        if data.get('name'):
-            users[uname]['name'] = data['name']
-        if data.get('role'):
-            users[uname]['role'] = data['role']
-        save_data(USERS_FILE, users)
-        return jsonify({'success': True})
-    return jsonify({'success': False, 'error': 'User not found'})
+    conn  = get_db()
+    user  = conn.execute('SELECT username FROM users WHERE username=?', (uname,)).fetchone()
+    if not user:
+        conn.close()
+        return jsonify({'success': False, 'error': 'User not found'})
+    if data.get('password'):
+        conn.execute('UPDATE users SET password=? WHERE username=?', (data['password'], uname))
+    if data.get('name'):
+        conn.execute('UPDATE users SET name=? WHERE username=?', (data['name'], uname))
+    if data.get('role'):
+        conn.execute('UPDATE users SET role=? WHERE username=?', (data['role'], uname))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     import socket
@@ -338,17 +387,12 @@ if __name__ == '__main__':
     print("="*55)
     print(f"\n  📱 Mobile  :  http://{local_ip}:5000")
     print(f"  💻 Browser :  http://localhost:5000")
+    print(f"\n  🗄️  Database : {DB_PATH}")
     print("\n  👤 SYSTEM ADMINISTRATOR")
-    print("     Username : sylvester")
-    print("     Password : osei17")
+    print("     Username : sylvester  |  Password : osei17")
     print("\n  👤 MANAGER")
-    print("     Username : nanapoku")
-    print("     Password : patcus17")
+    print("     Username : nanapoku   |  Password : patcus17")
     print("\n  👤 SALES")
-    print("     Username : benjamin")
-    print("     Password : benji45")
-    print("\n  📲 Install as PWA:")
-    print("     1. Open URL on phone")
-    print("     2. Tap menu → 'Add to Home Screen'")
+    print("     Username : benjamin   |  Password : benji45")
     print("="*55 + "\n")
     app.run(host='0.0.0.0', port=5000, debug=False)

@@ -909,14 +909,13 @@ function renderDeliveries(data) {
       '<div class="card"><div class="empty-state"><div class="empty-icon">📦</div><p>No deliveries recorded yet</p></div></div>';
     return;
   }
-  let rows = [...data.deliveries].reverse().slice(0,50).map((d, ri) => {
-    const origIdx = data.deliveries.length - 1 - ri;
+  let rows = [...data.deliveries].reverse().slice(0,50).map((d) => {
     return `<tr>
       <td>${fmtDate(d.date)}</td>
       <td><strong>${d.customer}</strong><br><small style="color:var(--gray-400)">${d.location || ''}</small></td>
       <td><span class="badge badge-green">${d.size}</span></td>
       <td><strong>${d.quantity}</strong></td>
-      ${isAdmin ? `<td><button class="btn btn-danger" onclick="deleteRecord('delivery',${origIdx})">🗑</button></td>` : ''}
+      ${isAdmin ? `<td><button class="btn btn-danger" onclick="deleteRecord('delivery',${d.id})">🗑</button></td>` : ''}
     </tr>`;
   }).join('');
   document.getElementById('deliveryList').innerHTML = `
@@ -938,15 +937,14 @@ function renderRevenues(data) {
       '<div class="card"><div class="empty-state"><div class="empty-icon">💰</div><p>No payments recorded yet</p></div></div>';
     return;
   }
-  let rows = [...data.revenues].reverse().slice(0,50).map((r, ri) => {
-    const origIdx = data.revenues.length - 1 - ri;
+  let rows = [...data.revenues].reverse().slice(0,50).map((r) => {
     return `<tr>
       <td>${fmtDate(r.date)}</td>
       <td><span class="badge ${r.type==='Blocks Sale'?'badge-green':'badge-gold'}">${r.type}</span></td>
       <td>${r.size || (r.desc || '—')}</td>
       <td>${r.quantity > 0 ? r.quantity : '—'}</td>
       <td><strong style="color:var(--green-700)">₵${Number(r.amount).toFixed(2)}</strong></td>
-      ${isAdmin ? `<td><button class="btn btn-danger" onclick="deleteRecord('revenue',${origIdx})">🗑</button></td>` : ''}
+      ${isAdmin ? `<td><button class="btn btn-danger" onclick="deleteRecord('revenue',${r.id})">🗑</button></td>` : ''}
     </tr>`;
   }).join('');
   document.getElementById('revenueList').innerHTML = `
@@ -968,14 +966,13 @@ function renderExpenses(data) {
       '<div class="card"><div class="empty-state"><div class="empty-icon">📉</div><p>No expenses recorded yet</p></div></div>';
     return;
   }
-  let rows = [...data.expenses].reverse().slice(0,50).map((e, ri) => {
-    const origIdx = data.expenses.length - 1 - ri;
+  let rows = [...data.expenses].reverse().slice(0,50).map((e) => {
     return `<tr>
       <td>${fmtDate(e.date)}</td>
       <td><span class="badge badge-red">${e.category}</span></td>
       <td>${e.desc || '—'}</td>
       <td><strong style="color:var(--red)">₵${Number(e.amount).toFixed(2)}</strong></td>
-      ${isAdmin ? `<td><button class="btn btn-danger" onclick="deleteRecord('expense',${origIdx})">🗑</button></td>` : ''}
+      ${isAdmin ? `<td><button class="btn btn-danger" onclick="deleteRecord('expense',${e.id})">🗑</button></td>` : ''}
     </tr>`;
   }).join('');
   document.getElementById('expenseList').innerHTML = `
@@ -997,8 +994,7 @@ function renderMoulds(data) {
       '<div class="card"><div class="empty-state"><div class="empty-icon">🧱</div><p>No production runs recorded yet</p></div></div>';
     return;
   }
-  let rows = [...data.moulds].reverse().slice(0,50).map((m, ri) => {
-    const origIdx = data.moulds.length - 1 - ri;
+  let rows = [...data.moulds].reverse().slice(0,50).map((m) => {
     const blocks = m.total_blocks || (m.palettes * (m.size.includes('5') ? 6 : 5));
     return `<tr>
       <td>${fmtDate(m.date)}</td>
@@ -1006,7 +1002,7 @@ function renderMoulds(data) {
       <td>${m.palettes}</td>
       <td><strong>${blocks}</strong></td>
       <td>${m.cement}</td>
-      ${isAdmin ? `<td><button class="btn btn-danger" onclick="deleteRecord('mould',${origIdx})">🗑</button></td>` : ''}
+      ${isAdmin ? `<td><button class="btn btn-danger" onclick="deleteRecord('mould',${m.id})">🗑</button></td>` : ''}
     </tr>`;
   }).join('');
   document.getElementById('mouldList').innerHTML = `
@@ -1137,10 +1133,9 @@ function loadAdminList(type) {
   }
 
   const apiType = {deliveries:'delivery', revenues:'revenue', expenses:'expense', moulds:'mould'}[type];
-  let rows = [...cfg.data].reverse().map((item, ri) => {
-    const origIdx = cfg.data.length - 1 - ri;
+  let rows = [...cfg.data].reverse().map((item) => {
     const cells = cfg.row(item).map(c => `<td>${c}</td>`).join('');
-    return `<tr>${cells}<td><button class="btn btn-danger" onclick="deleteRecord('${apiType}',${origIdx})">🗑 Delete</button></td></tr>`;
+    return `<tr>${cells}<td><button class="btn btn-danger" onclick="deleteRecord('${apiType}',${item.id})">🗑 Delete</button></td></tr>`;
   }).join('');
 
   const ths = [...cfg.cols, ''].map(c => `<th>${c}</th>`).join('');

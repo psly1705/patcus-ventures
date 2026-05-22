@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: patcus-ventures
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true   # Render auto-generates a secure random value
+      - key: DATABASE_PATH
+        value: /data/patcus.db
+    disk:
+      name: patcus-data
+      mountPath: /data
+      sizeGB: 1
